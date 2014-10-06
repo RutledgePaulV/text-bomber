@@ -1,0 +1,5 @@
+*.pyc
+bower_components
+*.css
+*.sqlite3
+.idea

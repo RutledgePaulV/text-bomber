@@ -1,0 +1,25 @@
+{
+  "name": "Bomb",
+  "version": "0.0.0",
+  "authors": [
+    "paul.v.rutledge@gmail.com"
+  ],
+  "description": "A text bombing application",
+  "main": "Bomb/wsgi.py",
+  "keywords": [
+    "bomb",
+    "text"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery.cookie": "~1.4.1"
+  }
+}
