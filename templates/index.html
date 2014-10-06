@@ -15,28 +15,12 @@
 			</div>
 
 			<div class="jumbotron">
-				<form id="text">
 
-					<textarea name="message" rows="4" cols="50" placeholder="Your message here..."></textarea>
+				<h3 class="text-center text-capitalize sending">Sending...</h3>
+				<h3 class="text-center text-capitalize complete">Complete...</h3>
 
-					<input name="number" class="form-search" type="text" size="50" placeholder="Cell Phone #"/>
-
-					<label for="provider">Select The Provider:</label>
-					<select id="provider" name="provider">
-						{% for provider in providers %}
-							<option value="{{ provider.pk }}">{{ provider.name }}</option>
-						{% endfor %}
-					</select>
-
-					<label for="count">Select The Count:</label>
-					<select id="count" name="count">
-						<option value="5">5</option>
-						<option value="20">20</option>
-						<option value="100">100</option>
-						<option value="250">250</option>
-						<option value="500">500</option>
-					</select>
-
+				<form class="form">
+					{% include 'partials/_form.html' %}
 					<button id='send' class="btn-large" type="button">Send</button>
 				</form>
 

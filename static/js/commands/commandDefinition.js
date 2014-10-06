@@ -65,9 +65,9 @@ Command.prototype = {
 	/**
 	 * Executes a command and appropriately calls the success and failure callbacks.
 	 *
-	 * @param {object} data
-	 * @param {function} success
-	 * @param {function} failure
+	 * @param {object} [data]
+	 * @param {function} [success]
+	 * @param {function} [failure]
 	 */
 	fire: function(data, success, failure){
 		_.ExecuteCommand(this, data, success, failure);
