@@ -12,7 +12,7 @@ var updateProgressBar = function (taskId) {
 		var percentComplete = data.results[0].percentageComplete;
 		PROGRESS_BAR.progressbar('value', percentComplete);
 
-		if(percentComplete === 100) {
+		if(percentComplete > 90) {
 			$('.sending').hide();
 			$('.complete').show();
 		}

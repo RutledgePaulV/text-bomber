@@ -36,9 +36,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Bomber',
+)
+
+CUSTOM_APPS = (
+	'Bomber',
     'Command'
 )
+
+INSTALLED_APPS += CUSTOM_APPS
+
+COMMAND_FILE = 'commands'
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
