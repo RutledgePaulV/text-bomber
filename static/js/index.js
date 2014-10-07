@@ -11,7 +11,6 @@ var updateProgressBar = function (taskId) {
 	_.registry.GET_PROGRESS.fire({taskId: taskId}, function (data) {
 		var percentComplete = data.results[0].percentageComplete;
 		PROGRESS_BAR.progressbar('value', percentComplete);
-
 		if(percentComplete > 90) {
 			$('.sending').hide();
 			$('.complete').show();
@@ -28,12 +27,10 @@ var updateProgressBar = function (taskId) {
  */
 var submitForm = function () {
 	_.registry.QUEUE_TEXTS.fire(FORM.serialize(), function (data) {
-		if (data.status === 'SUCCESS') {
 			FORM.hide();
 			$('.sending').show();
 			updateProgressBar(data.results[0].taskId);
-		}
-	});
+	})
 };
 
 $(document).ready(function () {

@@ -1,5 +1,7 @@
 from enum import Enum
 
+from .mixins import *
+
 
 def build_param_message(missing_params):
 	return "The following parameters were missing: {0}".format(", ".join(missing_params))
@@ -14,6 +16,8 @@ def build_permissions_message(missing_permissions):
 	Defining a parameter type enumeration to use when
     specifying the type a required parameter
 '''
+
+
 class PARAM_TYPE(Enum):
 	NUMBER = 'number'
 	STRING = 'string'
@@ -49,7 +53,7 @@ class STATUS(Enum):
 '''
 
 
-class CommandHandlerBase(object):
+class CommandHandlerBase(AjaxResponse):
 	# the canonical name for the command
 	command_name = ''
 
@@ -58,7 +62,6 @@ class CommandHandlerBase(object):
 
 	# a list of required user permissions for a command
 	required_permissions = []
-
 
 	# checks that the necessary parameters were provided with the command data
 	@classmethod
@@ -98,13 +101,3 @@ class CommandHandlerBase(object):
 	# just a placeholder, but implementations should handle the actual incoming command and return a HTTP response
 	def handle(self, request, command_data):
 		raise NotImplementedError("The default handle method was not overridden by the custom handler.")
-
-	# a shorthand method for returning a successful response
-	def success(self, payload):
-		response = {'status': STATUS.SUCCESS.value, 'results': payload}
-		return response
-
-	# a shorthand method for returning an error response
-	def error(self, message):
-		response = {'status': STATUS.ERROR.value, 'error': message}
-		return response

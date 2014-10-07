@@ -1,15 +1,12 @@
 from Command.base import *
+from Command.decorators import *
 from random import randint
 from Bomber.models import *
 
 def queue_messages(message, provider, count):
-
-	print(locals())
 	return 100
 
-
 def get_progress(task_id):
-
 	return randint(0, 100)
 
 class QueueTexts(CommandHandlerBase):
@@ -31,7 +28,7 @@ class QueueTexts(CommandHandlerBase):
 
 		task_id = queue_messages(message, provider, count)
 
-		return self.success([{'taskId':task_id}])
+		return self.success({'taskId':task_id})
 
 
 class GetProgress(CommandHandlerBase):
@@ -45,4 +42,4 @@ class GetProgress(CommandHandlerBase):
 	def handle(self, request, command_data):
 
 		percentage = get_progress(command_data['taskId'])
-		return self.success([{'percentageComplete':percentage}])
+		return self.success({'percentageComplete':percentage})

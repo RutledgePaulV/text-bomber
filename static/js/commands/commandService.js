@@ -57,7 +57,7 @@ var _ = (function (_) {
 			if(ready){ready(data);}
 		};
 
-		$.get(uriEndpoint || available_endpoint).done(callback).fail(this._errorUpdatingCallback);
+		$.get(uriEndpoint || all_endpoint).done(callback).fail(this._errorUpdatingCallback);
 	};
 
 	/**
