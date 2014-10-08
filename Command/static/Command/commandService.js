@@ -45,7 +45,7 @@ var _ = (function (_) {
 	 * A publicly accessible method that reloads the available commands
 	 * cache that is used to validate commands before they are sent to the server.
 	 *
-	 * @param {function} ready A callback that gets fired after the command definitions have been loaded.
+	 * @param {function} [ready] A callback that gets fired after the command definitions have been loaded.
 	 * @param {string} [uriEndpoint] An optional alternative endpoint from which to populate the commands.
 	 */
 	_.UpdateDefinitions = function (ready, uriEndpoint) {
@@ -57,7 +57,7 @@ var _ = (function (_) {
 			if(ready){ready(data);}
 		};
 
-		$.get(uriEndpoint || all_endpoint).done(callback).fail(this._errorUpdatingCallback);
+		$.get(uriEndpoint || available_endpoint).done(callback).fail(this._errorUpdatingCallback);
 	};
 
 	/**
@@ -126,7 +126,8 @@ var _ = (function (_) {
 	 * @param {{name:string,required:{name:string, type:string}[]}[]} results
 	 * @private
 	 */
-	_._doneUpdatingCallback = $.proxy(function (results) {
+	_._doneUpdatingCallback = $.proxy(function (response) {
+		var results = response.results;
 		for (var index in results) {
 			if (results.hasOwnProperty(index)) {
 				var command = results[index];

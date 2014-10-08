@@ -1,13 +1,14 @@
 from Command.base import *
 from Command.decorators import *
-from random import randint
 from Bomber.models import *
+from random import randint
 
 def queue_messages(message, provider, count):
 	return 100
 
 def get_progress(task_id):
 	return randint(0, 100)
+
 
 class QueueTexts(CommandHandlerBase):
 
@@ -34,10 +35,7 @@ class QueueTexts(CommandHandlerBase):
 class GetProgress(CommandHandlerBase):
 
 	command_name = 'GET_PROGRESS'
-
-	required_params = [
-		('taskId', PARAM_TYPE.NUMBER, 0)
-	]
+	required_params = [('taskId', PARAM_TYPE.NUMBER, 0)]
 
 	def handle(self, request, command_data):
 

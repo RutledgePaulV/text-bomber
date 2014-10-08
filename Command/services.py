@@ -1,10 +1,9 @@
 from threading import local
 import inspect
-from .loader import *
 from .base import *
 from .mixins import *
 
-
+# making sure we instantiate the service once per thread
 _local = local()
 
 '''
@@ -29,48 +28,47 @@ class Service(object):
 	needs to be done to read the available handlers. This *could* be an expensive operation
 	that kills performance if changed to a prototype scope.
 '''
-
-
-class CommandService(Service, AjaxResponse):
-	# a dictionary that maps command names to the actual command handler class
-	dispatch_map = {}
+class CommandService(Service, AjaxMixin):
 
 	# the name of the field at which command handlers should specify their callable name.
 	command_name_field = 'command_name'
 
-	# when we instantiate the service, we load available commands into the dict.
-	def __init__(self):
-		for module in load_from_apps():
-			for name, obj in inspect.getmembers(module, inspect.isclass):
-				if obj is not CommandHandlerBase and issubclass(obj, CommandHandlerBase):
-					command_name = getattr(obj, self.command_name_field)
-					if not command_name in self.dispatch_map:
-						self.dispatch_map[command_name] = obj
-					else:
-						message = 'Multiple definitions provided for {0}.'.format(command_name)
-						raise Exception(message)
+	# handlers
+	handlers = CommandHandlerBase.plugins
 
 	# used to retrieve a set of all commands and their required parameters
 	def get_all_definitions(self):
-		return [command.to_definition() for command in self.dispatch_map.values()]
+		return [command.to_definition() for command in self.handlers.values()]
 
 	# used to retrieve a set of commands based on a particular user's permissions
 	def get_available_definitions(self, request):
-		return [command.to_definition() for command in self.dispatch_map.values()
+		return [command.to_definition() for command in self.handlers.values()
 		        if command.validate_permissions(request) and command.validate_auth(request)]
 
 	# method to check if a handler exists for the command
 	def has_handler(self, command_name):
-		return command_name in self.dispatch_map
+		return command_name in self.handlers
+
+	# returns the appropriate handler
+	def get_handler(self, command_name):
+		return self.handlers[command_name]
 
 	# handles the dispatching and execution of a command
 	def dispatch(self, request, command_data):
 
+		# make sure they actually specified a command in the request
+		if not 'command' in request.POST:
+			return self.error("No command parameter was received.", 400)
+
 		# retrieving the name of the command
 		command_name = command_data.pop('command')[0]
 
+		# make sure a valid handler strategy exists.
+		if not self.has_handler(command_name):
+			return self.error("No command handler exists for the requested command", 400)
+
 		# retrieving the class for the command handler
-		handler_class = self.dispatch_map[command_name]
+		handler_class = self.get_handler(command_name)
 
 		# First, check if the user needs to be authenticated
 		if not handler_class.validate_auth(request):

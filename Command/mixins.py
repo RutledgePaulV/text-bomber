@@ -1,15 +1,10 @@
 from django.http import JsonResponse
 
 
-class AjaxResponse(object):
-
-	OKAY = 200
-	NOT_ALLOWED = 403
-	BAD_REQUEST = 405
-	UNAUTHORIZED = 401
+class AjaxMixin(object):
 
 	@classmethod
-	def success(cls, results, meta=None):
+	def success(cls, results, meta=None, status=200):
 		if isinstance(results, list):
 			data = results
 		elif isinstance(results, dict):
@@ -19,10 +14,10 @@ class AjaxResponse(object):
 
 		content = {'results': data}
 		if meta: content.update(meta)
-		return JsonResponse(content, status=cls.OKAY)
+		return JsonResponse(content, status=status)
 
 	@classmethod
-	def error(cls, message, meta=None, status=BAD_REQUEST):
-		content = {'error': message}
+	def error(cls, message, meta=None, status=405):
+		content = {'error': message, 'results':[]}
 		if meta: content.update(meta)
 		return JsonResponse(content, status=status)

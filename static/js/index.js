@@ -35,12 +35,16 @@ var submitForm = function () {
 
 $(document).ready(function () {
 
+	var csrfSafeMethod = function(method) {
+		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	};
+
 	/**
 	 * Inject CSRF token into all ajax requests.
 	 */
 	$.ajaxSetup({
 			crossDomain: false, beforeSend: function (xhr, settings) {
-				if (!Utils.csrfSafeMethod(settings.type)) {
+				if (!csrfSafeMethod(settings.type)) {
 					xhr.setRequestHeader("X-CSRFToken", $.cookie('csrftoken'));
 				}
 			}

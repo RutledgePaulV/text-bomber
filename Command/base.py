@@ -1,7 +1,6 @@
 from enum import Enum
-
+from .plugin import *
 from .mixins import *
-
 
 def build_param_message(missing_params):
 	return "The following parameters were missing: {0}".format(", ".join(missing_params))
@@ -16,8 +15,6 @@ def build_permissions_message(missing_permissions):
 	Defining a parameter type enumeration to use when
     specifying the type a required parameter
 '''
-
-
 class PARAM_TYPE(Enum):
 	NUMBER = 'number'
 	STRING = 'string'
@@ -30,8 +27,6 @@ class PARAM_TYPE(Enum):
 '''
 	Defines an enumeration for the status key on a response.
 '''
-
-
 class STATUS(Enum):
 	SUCCESS = 'SUCCESS'
 	ERROR = 'ERROR'
@@ -51,11 +46,13 @@ class STATUS(Enum):
 	The last thing that this class provides, is simply a #handle method that should
 	be overridden in each of the command handlers in order actually process a request.
 '''
+class CommandHandlerBase(AjaxMixin, metaclass=Plugin):
 
-
-class CommandHandlerBase(AjaxResponse):
 	# the canonical name for the command
 	command_name = ''
+
+	# whether or not the command requires a user to be authenticated
+	auth_required = False
 
 	# a list of (name, PARAM_TYPE, default) tuples.
 	required_params = []
@@ -63,32 +60,24 @@ class CommandHandlerBase(AjaxResponse):
 	# a list of required user permissions for a command
 	required_permissions = []
 
-	# checks that the necessary parameters were provided with the command data
-	@classmethod
-	def validate_params(cls, command_data):
-		missing = [param[0] for param in cls.required_params if param[0] not in command_data]
-		if len(missing) > 1:
-			return False, build_param_message(missing)
-		return True, ''
-
-
 	# checks that the user on the request is logged in if 'authenticated' is a necessary permission
 	@classmethod
 	def validate_auth(cls, request):
-		return request.user.is_authenticated() if 'authenticated' in cls.required_permissions else True
+		return request.user.is_authenticated() if cls.auth_required else True
 
 
 	# checks that the user on the request has the necessary permissions for the command
 	@classmethod
 	def validate_permissions(cls, request):
-		if not 'authenticated' in cls.required_permissions:
-			to_check = cls.required_permissions
-		else:
-			to_check = cls.required_permissions.copy()
-			to_check.remove('authenticated')
-		if len(to_check) > 0:
-			return request.user.has_perms(to_check)
-		return True
+		return request.user.has_perms(cls.required_permissions)
+
+
+	# checks that the necessary parameters were provided with the command data
+	@classmethod
+	def validate_params(cls, command_data):
+		missing = [param[0] for param in cls.required_params if param[0] not in command_data]
+		if len(missing) > 0: return False, build_param_message(missing)
+		return True, ''
 
 
 	# gets a simple serializable definition of the command
@@ -101,3 +90,10 @@ class CommandHandlerBase(AjaxResponse):
 	# just a placeholder, but implementations should handle the actual incoming command and return a HTTP response
 	def handle(self, request, command_data):
 		raise NotImplementedError("The default handle method was not overridden by the custom handler.")
+
+
+# we want to automatically register all of the command modules in each app
+# but it should only happen once, the first time this file is imported.
+if not CommandHandlerBase.plugins:
+	from django.utils.module_loading import autodiscover_modules
+	autodiscover_modules('commands')
