@@ -1,5 +1,4 @@
 from threading import local
-import inspect
 from .base import *
 from .mixins import *
 
