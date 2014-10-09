@@ -14,17 +14,17 @@ class QueueTexts(CommandHandlerBase):
 
 	command_name = 'QUEUE_TEXTS'
 
-	required_params = [
-		('number', PARAM_TYPE.STRING, ''),
-		('message', PARAM_TYPE.STRING, ''),
-		('provider', PARAM_TYPE.NUMBER, 0),
-		('count', PARAM_TYPE.NUMBER, 0),
+	params = [
+		Param('number', Param.TYPE.STRING),
+		Param('message', Param.TYPE.STRING),
+		Param('provider', Param.TYPE.NUMBER),
+		Param('count', Param.TYPE.NUMBER)
 	]
 
 	def handle(self, request, command_data):
 
 		message = command_data['message']
-		provider = command_data['provider']#Provider.objects.get(pk=command_data['provider'])
+		provider = command_data['provider']
 		count = command_data['count']
 
 		task_id = queue_messages(message, provider, count)
@@ -35,7 +35,7 @@ class QueueTexts(CommandHandlerBase):
 class GetProgress(CommandHandlerBase):
 
 	command_name = 'GET_PROGRESS'
-	required_params = [('taskId', PARAM_TYPE.NUMBER, 0)]
+	params = [Param('taskId', Param.TYPE.NUMBER)]
 
 	def handle(self, request, command_data):
 

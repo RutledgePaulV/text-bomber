@@ -52,9 +52,11 @@ var _ = (function (_) {
 		this.registry = {};
 		var done = $.proxy(this._doneUpdatingCallback, this);
 
-		var callback = function(data){
+		var callback = function (data) {
 			done(data);
-			if(ready){ready(data);}
+			if (ready) {
+				ready(data);
+			}
 		};
 
 		$.get(uriEndpoint || available_endpoint).done(callback).fail(this._errorUpdatingCallback);
@@ -64,14 +66,14 @@ var _ = (function (_) {
 	 * A publicly accessible method that executes a given command
 	 * after first performing validation.
 	 *
-	 * @param {Command} command
+	 * @param {_.Command} command
 	 * @param {object} [data]
 	 * @param {function} [success]
 	 * @param {function} [failure]
 	 */
 	_.ExecuteCommand = function (command, data, success, failure) {
 
-		if (!command instanceof Command) {
+		if (!command instanceof _.Command) {
 			throw new Error("Invalid command object provided. Aborting execution of command.");
 		}
 
@@ -80,8 +82,10 @@ var _ = (function (_) {
 		if (this._validateCommand(command, data)) {
 
 			// If no success function was given, let's just print it to the console.
-			if(!success){
-				success = function(data){console.log(data);};
+			if (!success) {
+				success = function (data) {
+					console.log(data);
+				};
 			}
 
 			// This is the actual execution of the validated command.
@@ -89,13 +93,13 @@ var _ = (function (_) {
 
 		} else {
 
-			var message = this._buildCommandMessage(command);
+			var message = this._buildCommandMessage(command, data);
 
 			// either passing the error to their failure callback or just throwing it.
 			if (failure) {
 				failure(new Error(message));
 			} else {
-				throw new Error(message);
+				console.error(message);
 			}
 		}
 	};
@@ -103,8 +107,11 @@ var _ = (function (_) {
 	/**
 	 * This builds a meaningful message intended to provide the necessary information
 	 * to diagnose why a given command failed validation.
+	 *
+	 * @param {_.Command} command
+	 * @param {object} data
 	 */
-	_._buildCommandMessage = $.proxy(function (command) {
+	_._buildCommandMessage = $.proxy(function (command, data) {
 
 		var message;
 
@@ -127,13 +134,9 @@ var _ = (function (_) {
 	 * @private
 	 */
 	_._doneUpdatingCallback = $.proxy(function (response) {
-		var results = response.results;
-		for (var index in results) {
-			if (results.hasOwnProperty(index)) {
-				var command = results[index];
-				this.registry[command.name] = Command.fromServer(command);
-			}
-		}
+		response.results.forEach(function (command) {
+			this.registry[command.name] = _.Command.fromServer(command);
+		}, this);
 	}, _);
 
 	/**
@@ -144,7 +147,7 @@ var _ = (function (_) {
 	 */
 	_._errorUpdatingCallback = $.proxy(function (error) {
 		alert('An error was encountered while retrieving available commands. Logging error to console.');
-		console.log(error);
+		console.error(error);
 	}, _);
 
 	/**
@@ -152,26 +155,28 @@ var _ = (function (_) {
 	 * received from the server, and any defaults that have been set on the
 	 * front end.
 	 *
-	 * @param {Command} command The command key to be validated.
+	 * @param {_.Command} command The command key to be validated.
 	 * @param {object} data The data intended to be sent along with the command.
 	 * @private
 	 */
 	_._validateCommand = function (command, data) {
-		var valid = true;
 		if (this.registry.hasOwnProperty(command.name)) {
-			var required = this.registry[command.name].required;
-			for (var index in required) {
-				if (required.hasOwnProperty(index)) {
-					var required_param = required[index];
-					if (!data.hasOwnProperty(required_param.name)) {
-						valid = false;
-						break;
+			for (var key in this.registry[command.name].params) {
+				var param = this.registry[command.name].params[key];
+				if (param.required && !data.hasOwnProperty(key)) {
+					console.error('Required Parameter: ' + key + " was missing.");
+					return false;
+				}
+				if (data.hasOwnProperty(key)) {
+					if (!_.Validation.typeIs(data[key], param.type)) {
+						console.error("Invalid property type for property: " + key + ".");
+						return false;
 					}
-					// FIXME: if we're going to be supplying type, we should do validation against that here too.
 				}
 			}
 		}
-		return valid;
+		console.warn("Could not find command: " + command.name + " in registry. Allowing execution anyway.");
+		return true;
 	};
 
 	return _;

@@ -11,25 +11,27 @@ def build_permissions_message(missing_permissions):
 	return "The following permissions were missing: {0}".format(", ".join(missing_permissions))
 
 
-'''
-	Defining a parameter type enumeration to use when
-    specifying the type a required parameter
-'''
-class PARAM_TYPE(Enum):
-	NUMBER = 'number'
-	STRING = 'string'
-	OBJECT = 'object'
-	NUMBER_ARRAY = 'number[]'
-	STRING_ARRAY = 'string[]'
-	OBJECT_ARRAY = 'object[]'
+class Param(object):
 
+	class TYPE(Enum):
+		NUMBER = 'number'
+		STRING = 'string'
+		OBJECT = 'object'
+		NUMBER_ARRAY = 'number[]'
+		STRING_ARRAY = 'string[]'
+		OBJECT_ARRAY = 'object[]'
 
-'''
-	Defines an enumeration for the status key on a response.
-'''
-class STATUS(Enum):
-	SUCCESS = 'SUCCESS'
-	ERROR = 'ERROR'
+	def __init__(self, name, type, required=True, default=None):
+		self.name = name
+		self.type = type
+		self.default = default
+		self.required = required
+
+	def dictify(self):
+		definition = {'name': self.name, 'type': self.type.value, 'required': self.required}
+		if self.default:
+			definition['default'] = self.default
+		return definition
 
 
 '''
@@ -54,8 +56,8 @@ class CommandHandlerBase(AjaxMixin, metaclass=Plugin):
 	# whether or not the command requires a user to be authenticated
 	auth_required = False
 
-	# a list of (name, PARAM_TYPE, default) tuples.
-	required_params = []
+	# a list of params.
+	params = []
 
 	# a list of required user permissions for a command
 	required_permissions = []
@@ -75,7 +77,8 @@ class CommandHandlerBase(AjaxMixin, metaclass=Plugin):
 	# checks that the necessary parameters were provided with the command data
 	@classmethod
 	def validate_params(cls, command_data):
-		missing = [param[0] for param in cls.required_params if param[0] not in command_data]
+		required = [param for param in cls.params if param.required]
+		missing = [param.name for param in required if param.name not in command_data]
 		if len(missing) > 0: return False, build_param_message(missing)
 		return True, ''
 
@@ -83,8 +86,7 @@ class CommandHandlerBase(AjaxMixin, metaclass=Plugin):
 	# gets a simple serializable definition of the command
 	@classmethod
 	def to_definition(cls):
-		params = [{'name': name, 'type': kind.value, 'default': default} for name, kind, default in cls.required_params]
-		return {'name': cls.command_name, 'params': params}
+		return {'name': cls.command_name, 'params': [param.dictify() for param in cls.params]}
 
 
 	# just a placeholder, but implementations should handle the actual incoming command and return a HTTP response
