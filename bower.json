@@ -23,6 +23,7 @@
     "jquery.cookie": "~1.4.1",
     "bootstrap": "~3.2.0",
     "jquery": "~2.1.1",
-    "jquery-ui": "~1.11.1"
+    "jquery-ui": "~1.11.1",
+    "jquery-serialize-object": "~2.4.3"
   }
 }

@@ -3,6 +3,7 @@
 
 <label for="provider">Select The Provider:</label>
 <select id="provider" name="provider">
+	<option value="0">Default</option>
 	{% for provider in providers %}
 		<option value="{{ provider.pk }}">{{ provider.name }}</option>
 	{% endfor %}

@@ -17,8 +17,8 @@ class QueueTexts(CommandHandlerBase):
 	params = [
 		Param('number', Param.TYPE.STRING),
 		Param('message', Param.TYPE.STRING),
-		Param('provider', Param.TYPE.NUMBER),
-		Param('count', Param.TYPE.NUMBER)
+		Param('provider', Param.TYPE.STRING),
+		Param('count', Param.TYPE.STRING)
 	]
 
 	def handle(self, request, command_data):

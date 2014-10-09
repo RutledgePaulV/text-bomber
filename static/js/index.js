@@ -26,7 +26,7 @@ var updateProgressBar = function (taskId) {
  * This handler submits the form and then begins updating the progress bar.
  */
 var submitForm = function () {
-	_.registry.QUEUE_TEXTS.fire(FORM.serialize(), function (data) {
+	_.registry.QUEUE_TEXTS.fire(FORM.serializeObject(), function (data) {
 			FORM.hide();
 			$('.sending').show();
 			updateProgressBar(data.results[0].taskId);
