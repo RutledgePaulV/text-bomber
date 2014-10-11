@@ -1,39 +1,21 @@
-from threading import local
 from .base import *
 from .mixins import *
-
-# making sure we instantiate the service once per thread
-_local = local()
-
-'''
-	Django actually doesn't have a well supported way of describing singleton services.
-	So, we spin up a thread specifically for services upon which to instantiate them. And
-	provide a single method #get that always returns the same instance per thread for the service.
-'''
-class Service(object):
-	@classmethod
-	def get(cls):
-		if not hasattr(_local, cls.__name__):
-			setattr(_local, cls.__name__, cls())
-		return getattr(_local, cls.__name__, None)
-
+from Meta.singleton import *
 
 '''
 	This service exists to index the available commands by scanning the commands package and
 	provide a way of routing to the correct command class based on the command name received
 	by the front end code.
-
-	This is best expressed as a singleton service because of the meta level inspection that
-	needs to be done to read the available handlers. This *could* be an expensive operation
-	that kills performance if changed to a prototype scope.
 '''
-class CommandService(Service, AjaxMixin):
+
+@Singleton
+class CommandService(AjaxMixin):
 
 	# the name of the field at which command handlers should specify their callable name.
 	command_name_field = 'command_name'
 
 	# handlers
-	handlers = CommandHandlerBase.plugins
+	handlers = CommandHandlerBase.registry
 
 	# used to retrieve a set of all commands and their required parameters
 	def get_all_definitions(self):
@@ -42,7 +24,7 @@ class CommandService(Service, AjaxMixin):
 	# used to retrieve a set of commands based on a particular user's permissions
 	def get_available_definitions(self, request):
 		return [command.to_definition() for command in self.handlers.values()
-		        if command.validate_permissions(request) and command.validate_auth(request)]
+		        if command.validate_auth(request) and command.validate_permissions(request)]
 
 	# method to check if a handler exists for the command
 	def has_handler(self, command_name):

@@ -1,6 +1,5 @@
 from django.views.generic import View
 from .services import *
-import json
 
 '''
 	This controller is responsible for receiving commands to execute
@@ -8,7 +7,7 @@ import json
 '''
 class CommandHandler(View, AjaxMixin):
 
-	service = CommandService.get()
+	service = CommandService()
 
 	# Right now we're not taking advantage of other HTTP methods.
 	def get(self, request, *args, **kwargs):
@@ -26,7 +25,7 @@ class CommandHandler(View, AjaxMixin):
 '''
 class AllCommandDefinitions(View, AjaxMixin):
 
-	service = CommandService.get()
+	service = CommandService()
 
 	def get(self, request, *args, **kwargs):
 		all_commands = self.service.get_all_definitions()
@@ -43,7 +42,7 @@ class AllCommandDefinitions(View, AjaxMixin):
 '''
 class AvailableCommandDefinitions(View, AjaxMixin):
 
-	service = CommandService.get()
+	service = CommandService()
 
 	def get(self, request, *args, **kwargs):
 		commands = self.service.get_available_definitions(request)
