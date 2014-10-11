@@ -1,0 +1,14 @@
+Django==1.7
+Markdown==2.5
+Pillow==2.5.3
+beautifulsoup4==4.3.2
+bleach==1.4
+django-appconf==0.6
+django-commands==0.1
+django-compressor==1.4
+django-filter==0.7
+django-rq==0.7.0
+django-toolkit==0.0.1
+html5lib==0.999
+rq==0.4.6
+six==1.8.0

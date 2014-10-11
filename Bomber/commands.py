@@ -1,4 +1,4 @@
-from Command.base import *
+from commands.base import *
 from Bomber.models import *
 from random import randint
 
