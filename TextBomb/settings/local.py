@@ -1,0 +1,1 @@
+SECRET_KEY = '$ew^+y)(zn4^7ktmzix44pp0ppunk%_dsrd66zqg05ai5u16o@'

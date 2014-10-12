@@ -1,7 +1,5 @@
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-SECRET_KEY = '$ew^+y)(zn4^7ktmzix44pp0ppunk%_dsrd66zqg05ai5u16o@'
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 DEBUG = TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -27,9 +25,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'Bomb.urls'
+ROOT_URLCONF = 'TextBomb.urls'
 
-WSGI_APPLICATION = 'Bomb.wsgi.application'
+WSGI_APPLICATION = 'TextBomb.wsgi.application'
 
 DATABASES = {
     'default': {

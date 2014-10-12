@@ -13,9 +13,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Provider',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
+                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
-                ('domain', models.CharField(max_length=255)),
+                ('gateway_domain', models.CharField(max_length=255)),
             ],
             options={
             },
@@ -24,13 +24,29 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Spoof',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', primary_key=True, serialize=False, auto_created=True)),
-                ('email', models.EmailField(max_length=75)),
+                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('username', models.EmailField(max_length=75)),
                 ('password', models.CharField(max_length=255)),
-                ('host', models.TextField()),
             ],
             options={
             },
             bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='SpoofDomain',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('host', models.CharField(max_length=255)),
+                ('port', models.PositiveIntegerField()),
+            ],
+            options={
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AddField(
+            model_name='spoof',
+            name='domain',
+            field=models.ForeignKey(to='Bomber.SpoofDomain'),
+            preserve_default=True,
         ),
     ]
