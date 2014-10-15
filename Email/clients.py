@@ -3,6 +3,12 @@ import smtplib
 import time
 
 
+# constructing the message.
+payload = MIMEText(message)
+payload['Subject'] = subject
+payload['From'] = sender_info.email
+payload['To'] = recipient_address
+
 def send(sender_info, recipient_address, subject, message, count=1, rate_in_seconds=5):
 
 	# getting a connection to the smtp server
@@ -13,12 +19,6 @@ def send(sender_info, recipient_address, subject, message, count=1, rate_in_seco
 
 	# logging in under the particular user
 	server.login(sender_info.username, sender_info.password)
-
-	# constructing the message.
-	payload = MIMEText(message)
-	payload['Subject'] = subject
-	payload['From'] = sender_info.email
-	payload['To'] = recipient_address
 
 	# sending the message
 	server.send_message(payload)
