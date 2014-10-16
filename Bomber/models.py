@@ -1,28 +1,41 @@
 from django.db import models
 
-# represents an account for sending emails from
-# having lots of these lets us get around things
-# like rate limits.
 class Spoof(models.Model):
+	"""
+		Represents an account for sending emails
+	"""
 	username = models.EmailField()
 	password = models.CharField(max_length=255)
+	rate_limit = models.PositiveIntegerField()
 	domain = models.ForeignKey('SpoofDomain')
 
 	def __str__(self):
 		return self.username
 
-# represents a supported email service that can be used to send the emails
+
 class SpoofDomain(models.Model):
+	"""
+		Represents a supported email service
+	"""
 	host = models.CharField(max_length=255)
 	port = models.PositiveIntegerField()
 
 	def __str__(self):
 		return self.host
 
-# a provider represents a cellular provider
+
 class Provider(models.Model):
+	"""
+		Represents a known cell carrier and sms gateway
+	"""
 	name = models.CharField(max_length=255)
-	gateway_domain = models.CharField(max_length=255)
+	gateway_domain = models.EmailField()
+
+	def get_address_from_number(self, number):
+		result = self.gateway_domain
+		for digit in number:
+			result = result.replace("#", digit, 1)
+		return result
 
 	def __str__(self):
 		return self.name

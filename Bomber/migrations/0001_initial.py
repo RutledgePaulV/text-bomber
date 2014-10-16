@@ -13,9 +13,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Provider',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('name', models.CharField(max_length=255)),
-                ('gateway_domain', models.CharField(max_length=255)),
+                ('gateway_domain', models.EmailField(max_length=75)),
             ],
             options={
             },
@@ -24,9 +24,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Spoof',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('username', models.EmailField(max_length=75)),
                 ('password', models.CharField(max_length=255)),
+                ('rate_limit', models.PositiveIntegerField()),
             ],
             options={
             },
@@ -35,7 +36,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SpoofDomain',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', auto_created=True, primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, verbose_name='ID', auto_created=True, serialize=False)),
                 ('host', models.CharField(max_length=255)),
                 ('port', models.PositiveIntegerField()),
             ],

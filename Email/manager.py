@@ -1,46 +1,79 @@
+# 3rd party
+from rq import Connection, Queue, Worker
+from redis import Redis
+from email.mime.text import MIMEText
+
+# my project
 from Bomber.models import *
 from toolkit.singleton import *
-from redis import Redis
-from rq import Connection, Queue, Worker
-import time
+from .clients import *
 
-class Server():
 
-	def send_message(self, message):
-		print(message)
-		time.sleep(1)
+# defining aa custom rq worker that runs on its own process
+from multiprocessing import Process
+class ProcessWorker(Process):
+
+	def __init__(self, queues, name):
+		super(ProcessWorker,self).__init__()
+		self.worker = Worker(queues, name)
+
+	def run(self):
+		# burst mode should force the worker
+		# and the process to shutdown once the queue is empty
+		self.worker.work(burst=True)
+
 
 @Singleton
 class Manager(object):
+
+	@staticmethod
+	def get_spoofs(self):
+		return Spoof.objects.all()
+
 	"""
 		The manager handles distributing the email tasks across queues.
+		We always want the same manager regardless of requesting thread
 	"""
-	def queue_emails(self, message, count):
-
+	@staticmethod
+	def queue_emails(message, count):
 		queues = []
-		available_spoofs = ['jerry', 'cambodia']
+		available_spoofs = [spoof for spoof in Spoof.objects.all()]
 		number_of_spoofs = len(available_spoofs)
 		messages_per_queue = count // number_of_spoofs
 		extra = count - (messages_per_queue * number_of_spoofs)
-		server = Server()
 
 		# going deep into each queue
 		for x in range(number_of_spoofs):
 
 			spoof = available_spoofs[x]
-			queue = Queue(spoof, connection=Redis())
+			queue = Queue(spoof.username, connection=Redis())
 			queues.append(queue)
 
 			for y in range(messages_per_queue):
-				queue.enqueue(server.send_message, "{0} - {1}".format(x,y))
+				queue.enqueue_call(func=send,args=(
+							  spoof.domain.host,
+							  spoof.domain.port,
+							  spoof.username,
+							  spoof.password,
+							  spoof.rate_limit,
+							  message))
 
 		# panning across each queue
 		for x in range(extra):
+			spoof = available_spoofs[x]
 			queue = queues[x]
-			queue.enqueue(server.send_message, message)
+			queue.enqueue_call(func=send,args=(
+							  spoof.domain.host,
+							  spoof.domain.port,
+							  spoof.username,
+							  spoof.password,
+							  spoof.rate_limit,
+							  message))
 
 
-	def start_work(self, queue_names):
+
+	@staticmethod
+	def start_work(queue_names):
 
 		# Provide queue names to listen to as arguments to this script,
 		with Connection():
@@ -53,22 +86,18 @@ class Manager(object):
 				for queue in queues_to_start:
 
 					# starting a separate worker process for each queue
-					t = ProcessWorker(Queue[queue], queue)
-					t.start()
+					t = ProcessWorker([Queue(queue)], queue)
+					t.run()
 			else:
 				print("Nothing to do here.")
 
+def run(queue_names):
 
-from multiprocessing import Process
+	payload = MIMEText('This is a sample message.')
+	payload['Subject'] = 'Test'
+	payload['From'] = 'paul.v.rutledge@gmail.com'
+	payload['To'] = 'paul.v.rutledge@gmail.com'
 
-class ProcessWorker(Process):
-
-	def __init__(self, queues, name):
-		super(ProcessWorker,self).__init__()
-		self.worker = Worker(queues, name)
-
-	def run(self):
-
-		# burst mode should force the worker
-		# and the process to shutdown once the queue is empty
-		self.worker.work(burst=True)
+	m = Manager()
+	m.queue_emails(payload, 20)
+	m.start_work(queue_names)
