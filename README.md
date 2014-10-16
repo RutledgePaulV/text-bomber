@@ -32,6 +32,19 @@
   queue, we can run many queues in parallel (one for each address)
   and thus still complete a large number of messages in a short
   amount of time.
+
+### Sample Email Call:
+```python
+def run():
+	payload = MIMEText('This is a sample message.')
+	payload['Subject'] = 'Test'
+	payload['From'] = 'paul.v.rutledge@gmail.com'
+	payload['To'] = 'paul.v.rutledge@gmail.com'
+
+	m = Manager()
+	m.queue_emails(Spoof.objects.all(), payload, 5)
+	m.start_work(['paul.v.rutledge@gmail.com'])
+```
     
 ### Patterns
 - This project makes use of a reusable django app that I wrote

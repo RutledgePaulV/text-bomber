@@ -9,6 +9,16 @@ class Spoof(models.Model):
 	rate_limit = models.PositiveIntegerField()
 	domain = models.ForeignKey('SpoofDomain')
 
+	@property
+	def task_arguments(self):
+		return (
+			self.domain.host,
+			self.domain.port,
+			self.username,
+			self.password,
+			self.rate_limit
+		)
+
 	def __str__(self):
 		return self.username
 
