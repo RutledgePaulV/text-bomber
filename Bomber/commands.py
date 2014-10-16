@@ -1,13 +1,9 @@
 from commands.base import *
 from Bomber.models import *
 from random import randint
+from email.mime.text import MIMEText
 
-def queue_messages(message, provider, count):
-	return 100
-
-def get_progress(task_id):
-	return randint(0, 100)
-
+from Email.manager import *
 
 class QueueTexts(CommandHandlerBase):
 
@@ -20,23 +16,40 @@ class QueueTexts(CommandHandlerBase):
 		Param('count', Param.TYPE.STRING)
 	]
 
+	manager = Manager()
+
 	def handle(self, request, command_data):
 
-		message = command_data['message']
-		provider = command_data['provider']
+		provider_pk = command_data['provider']
+		contents = command_data['message']
+		number = command_data['number']
 		count = command_data['count']
 
-		task_id = queue_messages(message, provider, count)
+		address = self.get_email_for_provider(number, provider_pk)
+		message = self.create_message(address, contents)
 
-		return self.success({'taskId':task_id})
+		batch_pk = self.manager.queue_emails(Spoof.objects.all(), message, count)
+
+		return self.success({'batchPk':batch_pk})
+
+
+	def create_message(self, address, contents):
+		message = MIMEText(contents)
+		message['To'] = address
+		message['Subject'] = 'h4x'
+		return message
+
+	def get_email_for_provider(self, number, provider):
+		provider = Provider.objects.get(pk=provider)
+		return provider.get_address_from_number(number)
 
 
 class GetProgress(CommandHandlerBase):
 
 	command_name = 'GET_PROGRESS'
-	params = [Param('taskId', Param.TYPE.NUMBER)]
+	params = [Param('batchPk', Param.TYPE.NUMBER)]
 
 	def handle(self, request, command_data):
-
-		percentage = get_progress(command_data['taskId'])
-		return self.success({'percentageComplete':percentage})
+		batch_pk = command_data['batchPk']
+		batch = Batch.objects.get(pk=batch_pk)
+		return self.success({'percent': batch.percent_complete})

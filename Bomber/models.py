@@ -49,3 +49,17 @@ class Provider(models.Model):
 
 	def __str__(self):
 		return self.name
+
+class Batch(models.Model):
+
+	size = models.PositiveIntegerField()
+	complete = models.PositiveIntegerField()
+
+	def increment(self):
+		if(self.complete < self.size):
+			self.complete = self.complete + 1
+			self.save()
+
+	@property
+	def percent_complete(self):
+		return self.complete / self.size

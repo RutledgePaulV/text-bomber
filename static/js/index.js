@@ -5,13 +5,13 @@ var FORM, PROGRESS_BAR;
  * make the appropriate requests and update itself until it reaches
  * one hundred percent.
  *
- * @param taskId
+ * @param batchPk
  */
-var updateProgressBar = function (taskId) {
-	_.registry.GET_PROGRESS.fire({taskId: taskId}, function (data) {
-		var percentComplete = data.results[0].percentageComplete;
+var updateProgressBar = function (batchPk) {
+	_.registry.GET_PROGRESS.fire({batchPk: batchPk}, function (data) {
+		var percentComplete = data.results[0].percent * 100;
 		PROGRESS_BAR.progressbar('value', percentComplete);
-		if(percentComplete > 90) {
+		if(percentComplete < 100) {
 			$('.sending').hide();
 			$('.complete').show();
 		}

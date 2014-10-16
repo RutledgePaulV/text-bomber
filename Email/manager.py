@@ -1,7 +1,6 @@
 # 3rd party
 from rq import Connection, Queue, Worker
 from redis import Redis
-from email.mime.text import MIMEText
 
 # my project
 from Bomber.models import *
@@ -16,8 +15,6 @@ class ProcessWorker(object):
 		we offload each one into a different process
 		so that there's no thread blocking inside the webapp
 	"""
-
-
 	def __init__(self, queue):
 		super(ProcessWorker,self).__init__()
 		worker = Worker([Queue(queue)], queue)
@@ -46,6 +43,9 @@ class Manager(object):
 		number_of_spoofs = len(spoofs)
 		messages_per_queue = count // number_of_spoofs
 		extra_to_distribute = count - (messages_per_queue * number_of_spoofs)
+		batch = Batch(size=count, complete=0)
+		batch.save()
+		pk = batch.pk
 
 		# going deep into each queue
 		for x in range(number_of_spoofs):
@@ -55,13 +55,13 @@ class Manager(object):
 			queues.append(queue)
 
 			for y in range(messages_per_queue):
-				queue.enqueue_call(func=send, args=spoof.task_arguments + (message,))
+				queue.enqueue_call(func=send, args=spoof.task_arguments + (message, pk))
 
 		# panning across each queue
 		for x in range(extra_to_distribute):
 			spoof = spoofs[x]
 			queue = queues[x]
-			queue.enqueue_call(func=send ,args=(spoof.task_arguments + (message,)))
+			queue.enqueue_call(func=send ,args=(spoof.task_arguments + (message, pk)))
 
 
 	@staticmethod

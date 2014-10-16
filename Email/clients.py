@@ -1,7 +1,8 @@
 import smtplib
 import time
+from Bomber.models import *
 
-def send(host, port, username, password, rate, payload):
+def send(host, port, username, password, rate, payload, batch_pk):
 
 	# getting a connection to the smtp server
 	server = smtplib.SMTP(host, port)
@@ -14,6 +15,8 @@ def send(host, port, username, password, rate, payload):
 
 	# sending the message
 	server.send_message(payload)
+	batch = Batch.objects.get(pk=batch_pk)
+	batch.increment()
 
 	# closing connection to the server
 	server.quit()
