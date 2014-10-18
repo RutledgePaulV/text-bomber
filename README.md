@@ -16,14 +16,15 @@
 ### Tech Stack
 - Django
 - Python
-- jQuery (core and ui)
 - Bootstrap
-- Redis
+- Python-RQ
+- Redis-Server
+- jQuery (core and ui)
 
 ### Tasking
 - To make this actually usable by a fair number of people, it
   is crucial to have a proper tasking system set up. For this
-  I have opted to Redis, and django-rq.
+  I have opted to use Redis, and python-rq.
 - Since mass amounts of emails in close proximity tend to be
   rate limited by the services we'll be using (google, yahoo, etc.)
   consideration must be taken to prevent the accounts being blocked.
@@ -32,19 +33,6 @@
   queue, we can run many queues in parallel (one for each address)
   and thus still complete a large number of messages in a short
   amount of time.
-
-### Sample Email Call:
-```python
-def run():
-	payload = MIMEText('This is a sample message.')
-	payload['Subject'] = 'Test'
-	payload['From'] = 'paul.v.rutledge@gmail.com'
-	payload['To'] = 'paul.v.rutledge@gmail.com'
-
-	m = Manager()
-	m.queue_emails(Spoof.objects.all(), payload, 5)
-	m.start_work(['paul.v.rutledge@gmail.com'])
-```
     
 ### Patterns
 - This project makes use of a reusable django app that I wrote
