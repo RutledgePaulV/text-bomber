@@ -51,6 +51,7 @@ class Manager(object):
 		for x in range(number_of_spoofs):
 
 			spoof = spoofs[x]
+			message['From'] = spoof.username
 			queue = Queue(spoof.username, connection=Redis())
 			queues.append(queue)
 
@@ -60,8 +61,11 @@ class Manager(object):
 		# panning across each queue
 		for x in range(extra_to_distribute):
 			spoof = spoofs[x]
+			message['From'] = spoof.username
 			queue = queues[x]
 			queue.enqueue_call(func=send ,args=(spoof.task_arguments + (message, pk)))
+
+		return pk
 
 
 	@staticmethod

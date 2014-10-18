@@ -11,12 +11,12 @@ var updateProgressBar = function (batchPk) {
 	_.registry.GET_PROGRESS.fire({batchPk: batchPk}, function (data) {
 		var percentComplete = data.results[0].percent * 100;
 		PROGRESS_BAR.progressbar('value', percentComplete);
-		if(percentComplete < 100) {
+		if(percentComplete === 100) {
 			$('.sending').hide();
 			$('.complete').show();
 		}
 		else{
-			setTimeout(function(){updateProgressBar(taskId);}, 1000);
+			setTimeout(function(){updateProgressBar(batchPk);}, 1000);
 		}
 	});
 };
@@ -29,7 +29,7 @@ var submitForm = function () {
 	_.registry.QUEUE_TEXTS.fire(FORM.serializeObject(), function (data) {
 			FORM.hide();
 			$('.sending').show();
-			updateProgressBar(data.results[0].taskId);
+			updateProgressBar(data.results[0].batchPk);
 	})
 };
 

@@ -23,12 +23,14 @@ class QueueTexts(CommandHandlerBase):
 		provider_pk = command_data['provider']
 		contents = command_data['message']
 		number = command_data['number']
-		count = command_data['count']
+		count = int(command_data['count'])
 
 		address = self.get_email_for_provider(number, provider_pk)
 		message = self.create_message(address, contents)
 
-		batch_pk = self.manager.queue_emails(Spoof.objects.all(), message, count)
+		spoofs = Spoof.objects.all()
+		batch_pk = self.manager.queue_emails(spoofs, message, count)
+		self.manager.start_work([spoof.username for spoof in spoofs])
 
 		return self.success({'batchPk':batch_pk})
 
