@@ -4,4 +4,5 @@ from .models import *
 # Create your views here.
 def index(request):
 	providers = Provider.objects.all()
-	return render(request, 'index.html', {'providers': providers})
+	count_options = [5, 20, 100, 250, 500]
+	return render(request, 'index.html', {'providers': providers, 'counts': count_options})
