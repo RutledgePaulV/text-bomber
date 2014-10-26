@@ -34,7 +34,7 @@
   and thus still complete a large number of messages in a short
   amount of time.
     
-### Patterns
+### Cool
 - This project makes use of a reusable django app that I wrote
   recently for more seamless communication between server and
   client. You can view that here: [django-commands](https://github.com/RutledgePaulV/django-commands)

@@ -10,30 +10,24 @@ class QueueTexts(CommandHandlerBase):
 	command_name = 'QUEUE_TEXTS'
 
 	params = [
-		Param('number', Param.TYPE.STRING),
-		Param('message', Param.TYPE.STRING),
-		Param('provider', Param.TYPE.STRING),
-		Param('count', Param.TYPE.STRING)
+		Param('number', Types.STRING),
+		Param('message', Types.STRING),
+		Param('provider', Types.INTEGER),
+		Param('count', Types.INTEGER)
 	]
 
 	manager = Manager()
 
-	def handle(self, request, command_data):
+	def handle(self, request, data):
 
-		provider_pk = command_data['provider']
-		contents = command_data['message']
-		number = command_data['number']
-		count = int(command_data['count'])
-
-		address = self.get_email_for_provider(number, provider_pk)
-		message = self.create_message(address, contents)
+		address = self.get_email_for_provider(data.number, data.provider)
+		message = self.create_message(address, data.message)
 
 		spoofs = Spoof.objects.all()
-		batch_pk = self.manager.queue_emails(spoofs, message, count)
+		batch_pk = self.manager.queue_emails(spoofs, message, data.count)
 		self.manager.start_work([spoof.username for spoof in spoofs])
 
-		return self.success({'batchPk':batch_pk})
-
+		return self.success({'batchPk': batch_pk})
 
 	def create_message(self, address, contents):
 		message = MIMEText(contents)
@@ -49,9 +43,8 @@ class QueueTexts(CommandHandlerBase):
 class GetProgress(CommandHandlerBase):
 
 	command_name = 'GET_PROGRESS'
-	params = [Param('batchPk', Param.TYPE.NUMBER)]
+	params = [Param('batchPk', Types.INTEGER)]
 
-	def handle(self, request, command_data):
-		batch_pk = command_data['batchPk']
-		batch = Batch.objects.get(pk=batch_pk)
+	def handle(self, request, data):
+		batch = Batch.objects.get(pk=data.batchPk)
 		return self.success({'percent': batch.percent_complete})

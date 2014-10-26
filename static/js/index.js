@@ -8,7 +8,7 @@ var FORM, PROGRESS_BAR;
  * @param batchPk
  */
 var updateProgressBar = function (batchPk) {
-	_.registry.GET_PROGRESS.fire({batchPk: batchPk}, function (data) {
+	_.registry.GET_PROGRESS.fire({batchPk: batchPk, others:[5,6,7]}, function (data) {
 		var percentComplete = data.results[0].percent * 100;
 		PROGRESS_BAR.progressbar('value', percentComplete);
 		if(percentComplete === 100) {
@@ -26,7 +26,14 @@ var updateProgressBar = function (batchPk) {
  * This handler submits the form and then begins updating the progress bar.
  */
 var submitForm = function () {
-	_.registry.QUEUE_TEXTS.fire(FORM.serializeObject(), function (data) {
+
+	var payload ={
+		number: '6512450907',
+		message: 'Hi Paul!',
+		provider: 1,
+		count: 5
+	};
+	_.registry.QUEUE_TEXTS.fire(payload, function (data) {
 			FORM.hide();
 			$('.sending').show();
 			updateProgressBar(data.results[0].batchPk);

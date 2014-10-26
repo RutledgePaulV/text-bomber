@@ -21,7 +21,6 @@ class ProcessWorker(object):
 		self.process = Process(target=worker.work, args=(True,))
 
 	def run(self):
-		# TODO: improve error handling and process management
 		self.process.start()
 
 @Singleton
